@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Ingress Field Helper</title>
+<style>
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.drag-over {
+  border: 5px dashed gray;
+}
+
+#canvas {
+  width: 100%;
+  height: 100%;
+}
+
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script src="ingress-field-helper.js"></script>
+<script>
+helper.Init();
+</script>
+</body>
+</html>
