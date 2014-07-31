@@ -1,5 +1,3 @@
-var algo = {};
-
 var helper = {
   //------Private Variables:
   body: null,
@@ -15,15 +13,21 @@ var helper = {
 
   //------Public Functions:
   Init: function Init() {
+    helper.canvas = document.getElementById('canvas');
+    helper.ctx = helper.canvas.getContext('2d');
     helper.body = document.getElementsByTagName("body")[0];
+
     helper.body.addEventListener("dragenter", helper.bodyDragEnter, false);
     helper.body.addEventListener("dragleave", helper.bodyDragLeave, false);
     helper.body.addEventListener("dragover", helper.bodyDragOver, false);
     helper.body.addEventListener("drop", helper.bodyDrop, false);
     window.addEventListener('resize', function(e) { helper.updateCanvas(); });
 
-    helper.canvas = document.getElementById('canvas');
-    helper.ctx = helper.canvas.getContext('2d');
+    if (localStorage.length) {
+      helper.setup(localStorage.imgBase64);
+      helper.offsetX = Number(localStorage.offsetX);
+      helper.offsetY = Number(localStorage.offsetY);
+    }
   },
 
 
@@ -72,14 +76,21 @@ var helper = {
       return true;
     }
 
-    var img = new Image();
     var reader = new FileReader();
+    reader.onload = function(e) {
+      localStorage.imgBase64 = e.target.result;
+      helper.setup(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  },
+
+  setup: function setup(imgBase64) {
+    var img = new Image();
     img.onload = function() {
       helper.canvas.width = img.width;
       helper.canvas.height = img.height;
-      var ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-      helper.img = ctx.getImageData(0, 0, img.width, img.height);
+      helper.ctx.drawImage(img, 0, 0);
+      helper.img = helper.ctx.getImageData(0, 0, img.width, img.height);
 
       helper.body.removeEventListener("dragenter", helper.bodyDragEnter);
       helper.body.removeEventListener("dragleave", helper.bodyDragLeave);
@@ -90,17 +101,17 @@ var helper = {
       helper.canvas.addEventListener("mouseup", helper.canvasMouseUp, false);
 
       helper.updateCanvas();
+
+      localStorage.offsetX = helper.offsetX;
+      localStorage.offsetY = helper.offsetY;
     };
-    reader.onload = function(e) {
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    img.src = imgBase64;
   },
 
   getRGBA: function getRGBA(img, x, y) {
     var w = img.width;
     var i = (y*w+x)*4;
-    return (img.data[i]<<24) | (img.data[i+1]<<16) | (img.data[i+2]<<8) | img.data[i+3];
+    return ((img.data[i]<<24) | (img.data[i+1]<<16) | (img.data[i+2]<<8) | img.data[i+3])>>>0;
   },
 
   setRGBA: function setRGBA(img, x, y, v) {
@@ -168,6 +179,9 @@ var helper = {
     helper.offsetY += e.y - helper.dragMouseY;
     helper.updateDragMouse(e);
     helper.updateCanvas();
+
+    localStorage.offsetX = helper.offsetX;
+    localStorage.offsetY = helper.offsetY;
   },
 
   canvasMouseUp: function drop(e) {
